@@ -108,7 +108,7 @@ loadASCfile: function [
 	/local
 		i			[integer!]
 		buffer		[block!]
-		result		[[logic!] [string!]]
+		result		[logic! string!]
 ] [
 	buffer: read ascfile
 	if (length? buffer) = 0 [return [false "The buffer is empty."]]
