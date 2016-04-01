@@ -2,7 +2,7 @@ Red [
 	Title:		"3D wireframe viewer"
 	Author:		"Stéphane Vénéri"
 	Date:		"01-04-2016"
-	Version:	0.1.0
+	Version:	0.1.2
 	To-Do:	{
 				- Clean the code... (In progress)
 				- Automatic resizing model after loading ASC file
@@ -115,9 +115,9 @@ loadASCfile: function [
 	"Load ASC file - 3D Studio ascii format"
 	ascfile			[file!]
 ] [
-	if not exists? ascfile [ return [#[false] MSG_ERR_EN_FILENOTFOUND] ]
+	if not exists? ascfile [ return reduce [#[false] MSG_ERR_FILENOTFOUND] ]
 	buffer: read ascfile
-	if (length? buffer) = 0 [ return [#[false] MSG_ERR_EN_BUFFEREMPTY] ]
+	if (length? buffer) = 0 [ return reduce [#[false] MSG_ERR_BUFFEREMPTY] ]
 
 	ws: charset reduce [space tab cr lf]
 	dstring: charset {"}
@@ -429,7 +429,7 @@ precalcul
 ;ret: loadASCfile %cube.asc
 ret: loadASCfile %duck.asc
 if (ret/1 = false) [
-	popup_alert second ret
+	popup_alert ret/2
 	quit
 ]
 
