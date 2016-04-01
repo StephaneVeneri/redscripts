@@ -94,19 +94,19 @@ to-radians: function [
 	"Convert degree to radians"
 	degree		[integer!]
 ] [
-	return (to float! degree) / 180 * pi
+	return (to-float degree) / 180 * pi
 ]
 
 to-integer: function [
 	"Convert a string to integer"
-	str			[string!]
+	str			[any-type!]
 ][
 	return (to integer! str)
 ]
 
 to-float: function [
 	"Convert a string to float"
-	str			[string!]
+	str			[any-type!]
 ][
 	return (to float! str)
 ]
