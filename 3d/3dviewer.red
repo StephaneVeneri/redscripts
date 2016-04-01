@@ -1,23 +1,35 @@
 Red [
-	Title: "3D wireframe viewer"
-	Author: "Stéphane Vénéri"
-	Date:	"29-03-2016"
-	To-Do:	{	- Clean the code...
-				- Automatic resizing model after loading ASC file 
+	Title:		"3D wireframe viewer"
+	Author:		"Stéphane Vénéri"
+	Date:		"01-04-2016"
+	Version:	0.1.0
+	To-Do:	{
+				- Clean the code... (In progress)
+				- Automatic resizing model after loading ASC file
 				- Display the model without user's action
 				- Improve the IHM
 				- Make an automatic rotation
 			}
-	Note:	"This is just an quite fun exercise for learn Red"
-	Needs:	'View
+	Note:		"This is just an quite fun exercise for learn Red"
+	Needs:		'View
 ]
 
+
 ; Constants ---------------------------------------
-ANGLE_MAX: 360
+ANGLE_MAX: 						360
+TITLE_APPLICATION:				"3D wireframe viewer"
+TITLE_POPUP_ERROR:				"Error"
+CHK_OPTIONHIDEFACES:			"Hide faces"
+BTN_CLOSE:						"Close"
+BTN_QUIT:						"Quit"
+MSG_ERR_FILENOTFOUND:			"File not found."
+MSG_ERR_BUFFEREMPTY:			"The buffer is empty."
+
 
 ; Variables ---------------------------------------
 tsin: make block! ANGLE_MAX
 tcos: make block! ANGLE_MAX
+
 
 ; Structures --------------------------------------
 
@@ -62,13 +74,11 @@ model: object [
 	]
 ]
 
+
 ; Functions --------------------------------------
 
 precalcul: function [
 	"Precalculate table of sin and cos"
-	/local
-		angle		[integer!]
-		value		[float!]
 ] [
 	angle: 1
 	while [angle <= ANGLE_MAX] [
@@ -84,7 +94,6 @@ to-radians: function [
 	"Convert degree to radians"
 	degree		[integer!]
 ] [
-	;print [degree ((to float! degree) / 180 * pi)]
 	return (to float! degree) / 180 * pi
 ]
 
@@ -105,23 +114,16 @@ to-float: function [
 loadASCfile: function [
 	"Load ASC file - 3D Studio ascii format"
 	ascfile			[file!]
-	/local
-		i			[integer!]
-		buffer		[block!]
-		result		[logic! string!]
 ] [
+	if not exists? ascfile [ return [#[false] MSG_ERR_EN_FILENOTFOUND] ]
 	buffer: read ascfile
-	if (length? buffer) = 0 [return [false "The buffer is empty."]]
+	if (length? buffer) = 0 [ return [#[false] MSG_ERR_EN_BUFFEREMPTY] ]
 
 	ws: charset reduce [space tab cr lf]
 	dstring: charset {"}
 	catch_eLement: [	any [dstring ws] "Tri-mesh"
 						thru ["Vertices:" [ws | none]]
 						copy value to ws (
-							;oneelt: copy element					; not work properly
-							;model/addElement oneelt				;
-							;oneelt/name: nameelt					;
-							;oneelt/nb_vertices: to-integer value	;
 							oneelt: make element [ name: nameelt nb_vertices: to-integer value]
 							model/addElement oneelt
 						)
@@ -175,15 +177,12 @@ loadASCfile: function [
 					]
 	]
 
-	result: [true ""]
-	return result
+	[#[true] none]
 ]
+
 
 zoom: function[
 	value		[float!]
-	/local
-		e		[integer!]
-		i		[integer!]
 ][
 	if value <> 0 [
 		e: 1
@@ -198,13 +197,12 @@ zoom: function[
 	]
 ]
 
+
 translation: function [
 	"Translation on all axes"
 	tx			[float!]
 	ty			[float!]
 	tz			[float!]
-	/local
-		e		[integer!]
 ][
 	; Translation on X
 	if tx <> 0 [
@@ -234,17 +232,9 @@ translation: function [
 	]
 ]
 
+
 center_repere: function [
 	"Search the model's repere"
-	/local
-		Xmin	[float!]
-		Ymin	[float!]
-		Zmin	[float!]
-		Xmax	[float!]
-		Ymax	[float!]
-		Zmax	[float!]
-		e		[integer!]
-		i		[integer!]
 ][
 	Xmin: model/oelement/1/vertices/1/1
 	Ymin: model/oelement/1/vertices/1/2
@@ -308,24 +298,10 @@ center_repere: function [
 	model/oelement/1/axes: model/oelement/1/axes * 0			; not clean
 ]
 
+
 drawModel: function [
 	"Draw the model"
-	hide		[logic!]
-	/local
-		e		[integer!]
-		i		[integer!]
-		j		[integer!]
-		a		[integer!]
-		b		[integer!]
-		c		[integer!]
-		area	[series!]
-		Xab		[float!]
-		Yab		[float!]
-		Xbc		[float!]
-		Ybc		[float!]
-		Xca		[float!]
-		Yca		[float!]
-		normale [float!]
+	hide		[logic!]		; Hide non-visible faces
 ][
 	area: copy []
 	append area [pen green]
@@ -364,13 +340,9 @@ drawModel: function [
 	return area
 ]
 
+
 rotationX: function [
 	angle		[integer!]
-	/local
-		e		[integer!]
-		i		[integer!]
-		pY		[float!]
-		pZ		[float!]
 ][
 	e: 1
 	while [e <= model/nb_elements] [
@@ -387,13 +359,9 @@ rotationX: function [
 	]
 ]
 
+
 rotationY: function [
 	angle		[integer!]
-	/local
-		e		[integer!]
-		i		[integer!]
-		pX		[float!]
-		pZ		[float!]
 ][
 	e: 1
 	while [e <= model/nb_elements] [
@@ -410,13 +378,9 @@ rotationY: function [
 	]
 ]
 
+
 rotationZ: function [
 	angle		[integer!]
-	/local
-		e		[integer!]
-		i		[integer!]
-		pX		[float!]
-		pY		[float!]
 ][
 	e: 1
 	while [e <= model/nb_elements] [
@@ -433,16 +397,45 @@ rotationZ: function [
 	]
 ]
 
+
+popup_alert: function [
+	"Display a window with message's error"
+	msgerror	[string!]
+][
+ 	pop: make face! [
+		type: 'window text: TITLE_POPUP_ERROR offset: 200x200 size: 200x100
+		pane: reduce [
+			make face! [type: 'text text: msgerror offset: 10x10 size: 80x20]
+			make face! [
+				type: 'button text: BTN_CLOSE offset: 120x10 size: 60x20
+				actors: object [
+					on-click: function [
+						face		[object!]
+						event		[event!]
+					][
+						unview/all
+					]
+				]
+			]
+		]
+	]
+	view pop
+]
+
+
 ; Main ---------------------------------------------
+
 precalcul
 ;ret: loadASCfile %cube.asc
 ret: loadASCfile %duck.asc
+if (ret/1 = false) [
+	popup_alert second ret
+	quit
+]
 
 ; For debug
 ;probe model
 
-;print ["Nombre d'éléments: " model/nb_elements]
-;print ["Nombre total de faces: " model/nb_totalfaces]
 center_repere
 
 ; For the duck
@@ -453,17 +446,13 @@ translation 100.0 75.0 0.0
 ;zoom 100.0
 ;translation 320.0 240.0 200.0
 
-rotationX 90
-;rotationY 1
-;rotationZ 45
-
 ; For debug
 ;area: drawModel true
 ;probe area
 
 hidefaces: off
 view [
-	title "3D wireframe viewer"
+	title TITLE_APPLICATION
 	bx: base 640x480 black
 
 	below
@@ -483,7 +472,7 @@ view [
 		;wait 0.17
 	]
 
-	chk_hidefaces: check "Don't display hide faces" data: hidefaces [ hidefaces: not hidefaces]
-	bt_quit: button "Quit" [ quit ]
+	chk_hidefaces: check CHK_OPTIONHIDEFACES data: hidefaces [ hidefaces: (not hidefaces) ]
+	bt_quit: button BTN_QUIT [ quit ]
 	;text "Number of element: "
 ]
