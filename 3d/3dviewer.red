@@ -1,16 +1,20 @@
 Red [
 	Title:		"3D wireframe viewer"
 	Author:		"Stéphane Vénéri"
-	Date:		"01-04-2016"
-	Version:	0.1.2
+	Date:		"05-04-2016"
+	Version:	0.1.3
 	To-Do:	{
 				- Clean the code... (In progress)
-				- Automatic resizing model after loading ASC file
-				- Display the model without user's action
 				- Improve the IHM
+				- Display the model without user's action
+				- Automatic resizing model after loading ASC file
 				- Make an automatic rotation
 			}
-	Note:		"This is just an quite fun exercise for learn Red"
+	Notes:	{
+				This is just an quite fun exercise for me to learn Red.
+				For tested, use the stable version (red-060)
+				and not the automated builds.
+			}
 	Needs:		'View
 ]
 
@@ -121,7 +125,7 @@ loadASCfile: function [
 
 	ws: charset reduce [space tab cr lf]
 	dstring: charset {"}
-	catch_eLement: [	any [dstring ws] "Tri-mesh"
+	catch_element: [	any [dstring ws] "Tri-mesh"
 						thru ["Vertices:" [ws | none]]
 						copy value to ws (
 							oneelt: make element [ name: nameelt nb_vertices: to-integer value]
@@ -402,22 +406,11 @@ popup_alert: function [
 	"Display a window with message's error"
 	msgerror	[string!]
 ][
- 	pop: make face! [
-		type: 'window text: TITLE_POPUP_ERROR offset: 200x200 size: 200x100
-		pane: reduce [
-			make face! [type: 'text text: msgerror offset: 10x10 size: 80x20]
-			make face! [
-				type: 'button text: BTN_CLOSE offset: 120x10 size: 60x20
-				actors: object [
-					on-click: function [
-						face		[object!]
-						event		[event!]
-					][
-						unview/all
-					]
-				]
-			]
-		]
+	pop: [
+		title TITLE_POPUP_ERROR size 200x100
+		below
+		text msgerror
+		button BTN_CLOSE [ unview ]
 	]
 	view pop
 ]
