@@ -1,10 +1,10 @@
 Red [
 	Title:		"3D wireframe viewer"
 	Author:		"Stéphane Vénéri"
-	Date:		"05-04-2016"
-	Version:	0.1.3
+	Date:		"08-04-2016"
+	Version:	0.1.4
 	To-Do:	{
-				- Clean the code... (In progress)
+				- Clean the code
 				- Improve the IHM
 				- Display the model without user's action
 				- Automatic resizing model after loading ASC file
@@ -12,8 +12,6 @@ Red [
 			}
 	Notes:	{
 				This is just an quite fun exercise for me to learn Red.
-				For tested, use the stable version (red-060)
-				and not the automated builds.
 			}
 	Needs:		'View
 ]
@@ -28,6 +26,7 @@ BTN_CLOSE:						"Close"
 BTN_QUIT:						"Quit"
 MSG_ERR_FILENOTFOUND:			"File not found."
 MSG_ERR_BUFFEREMPTY:			"The buffer is empty."
+MSG_ERR_MODELNOTLOADED:			"The model wasn't loaded."
 
 
 ; Variables ---------------------------------------
@@ -123,62 +122,64 @@ loadASCfile: function [
 	buffer: read ascfile
 	if (length? buffer) = 0 [ return reduce [#[false] MSG_ERR_BUFFEREMPTY] ]
 
-	ws: charset reduce [space tab cr lf]
+	ws: charset reduce [space tab cr lf newline]
 	dstring: charset {"}
 	catch_element: [	any [dstring ws] "Tri-mesh"
-						thru ["Vertices:" [ws | none]]
+						thru "Vertices:" [ws | none]
 						copy value to ws (
 							oneelt: make element [ name: nameelt nb_vertices: to-integer value]
 							model/addElement oneelt
 						)
-						thru ["Faces:" [ws | none]]
+						thru "Faces:" [ws | none]
 						copy value to ws (
 							oneelt/nb_faces: to-integer value
 							nbv: oneelt/nb_vertices
 							nbf: oneelt/nb_faces
 							model/nb_totalfaces: model/nb_totalfaces + nbf
 						)
-						nbv [ 	thru ["X:" [ws | none]]
+						nbv [ 	thru "X:" [ws | none]
 								copy value to ws (cX: to-float value)
-								thru ["Y:" [ws | none]]
+								thru "Y:" [ws | none]
 								copy value to ws (cY: to-float value)
-								thru ["Z:" [ws | none]]
+								thru "Z:" [ws | none]
 								copy value to ws (
 									cZ: to-float value
 									oneelt/addVertex cX cY cZ
 								)
 						]
-						nbf [ 	thru ["A:" [ws | none]]
+						nbf [ 	thru "A:" [ws | none]
 								copy value to ws (iA: to-integer value)
-								thru ["B:" [ws | none]]
+								thru "B:" [ws | none]
 								copy value to ws (iB: to-integer value)
-								thru ["C:" [ws | none]]
+								thru "C:" [ws | none]
 								copy value to ws (iC: to-integer value)
-								thru ["AB:" [ws | none]]
+								thru "AB:" [ws | none]
 								copy value to ws (vAB: to-integer value)
-								thru ["BC:" [ws | none]]
+								thru "BC:" [ws | none]
 								copy value to ws (vBC: to-integer value)
-								thru ["CA:" [ws | none]]
+								thru "CA:" [ws | none]
 								copy value to ws (vCA: to-integer value
 									oneface: copy face
 									oneelt/addFace iA iB iC
 									oneelt/addEdge vAB vBC vCA
-									; print [iA iB iC "-" vAB vBC vCA]
+									;print [iA iB iC "-" vAB vBC vCA]
 								)
 						]
 	]
-	skip_others: [		thru ["Position:" [ws | none]]
+	skip_others: [		thru "Position:" [ws | none]
 	 					copy value to ws	; it works but I don't like that
 						;to "Direct"		; I need to understand why loop on Light02
 						;none				; I need to understand why loop on Light01
 	]
 
-	parse buffer [	some [	thru ["Named object:" ws dstring]
-							copy nameelt to dstring
-							catch_element
-							|
-							skip_others
-					]
+	parse buffer [
+		some [
+				thru "Named object:" ws dstring
+				copy nameelt to dstring
+				catch_element
+				|
+				skip_others
+			]
 	]
 
 	[#[true] none]
@@ -423,6 +424,10 @@ precalcul
 ret: loadASCfile %duck.asc
 if (ret/1 = false) [
 	popup_alert ret/2
+	quit
+]
+if model/nb_elements = 0 [
+	popup_alert MSG_ERR_MODELNOTLOADED
 	quit
 ]
 
