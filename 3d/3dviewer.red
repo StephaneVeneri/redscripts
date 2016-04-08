@@ -2,17 +2,24 @@ Red [
 	Title:		"3D wireframe viewer"
 	Author:		"Stéphane Vénéri"
 	Date:		"08-04-2016"
-	Version:	0.1.4
-	To-Do:	{
-				- Clean the code
-				- Improve the IHM
-				- Display the model without user's action
-				- Automatic resizing model after loading ASC file
-				- Make an automatic rotation
-			}
-	Notes:	{
-				This is just an quite fun exercise for me to learn Red.
-			}
+	Version:	0.1.5
+	Roadmap:	{
+					0.1.0	Clean the code
+					0.2.0	Improve the IHM
+								Make a generic message box
+								Reorganize control buttons
+					0.3.0	Improve loading model
+								Automatic resizing model after loading ASC file
+								Load a ASC file passed as argument
+								Make a file chooser for load ASC file
+								Display the model without user actions
+					0.4.0	Improve the model display
+								Display just the edges really necessary
+								Increase dynamically the drawing surface size
+					0.5.0	Make an automatic rotation
+					0.6.0	Improve the ASC file management
+				}
+	Note:		"This is just a quite fun exercise for me to learn Red."
 	Needs:		'View
 ]
 
