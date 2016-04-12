@@ -2,7 +2,7 @@ Red [
 	Title:		"3D wireframe viewer"
 	Author:		"Stéphane Vénéri"
 	Date:		"12-04-2016"
-	Version:	0.2.0
+	Version:	0.2.1
 	Roadmap:	{
 					0.1.0	Clean the code
 					0.2.0	Improve the IHM
@@ -478,11 +478,11 @@ precalcul
 ;ret: loadASCfile %cube.asc
 ret: loadASCfile %duck.asc
 if (ret/1 = false) [
-	messagebox ret/2 TYPE_MSGBOX_ERR
+	if error? try [messagebox ret/2 TYPE_MSGBOX_ERR] [print ret/2]
 	quit
 ]
 if model/nb_elements = 0 [
-	messagebox MSG_ERR_MODELNOTLOADED TYPE_MSGBOX_WRN
+	if error? try [messagebox MSG_ERR_MODELNOTLOADED TYPE_MSGBOX_WRN] [print ret/2]
 	quit
 ]
 
