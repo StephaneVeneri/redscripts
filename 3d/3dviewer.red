@@ -1,12 +1,12 @@
 Red [
 	Title:		"3D wireframe viewer"
 	Author:		"Stéphane Vénéri"
-	Date:		"08-04-2016"
-	Version:	0.1.5
+	Date:		"12-04-2016"
+	Version:	0.2.0
 	Roadmap:	{
 					0.1.0	Clean the code
 					0.2.0	Improve the IHM
-								Make a generic message box
+								* Make a generic message box
 								Reorganize control buttons
 					0.3.0	Improve loading model
 								Automatic resizing model after loading ASC file
@@ -27,13 +27,25 @@ Red [
 ; Constants ---------------------------------------
 ANGLE_MAX: 						360
 TITLE_APPLICATION:				"3D wireframe viewer"
-TITLE_POPUP_ERROR:				"Error"
+TITLE_ERROR:					"Error"
+TITLE_WARNING:					"Warning"
+TITLE_INFORMATION:				"Information"
 CHK_OPTIONHIDEFACES:			"Hide faces"
 BTN_CLOSE:						"Close"
 BTN_QUIT:						"Quit"
 MSG_ERR_FILENOTFOUND:			"File not found."
 MSG_ERR_BUFFEREMPTY:			"The buffer is empty."
 MSG_ERR_MODELNOTLOADED:			"The model wasn't loaded."
+TYPE_MSGBOX_ERR:				0
+TYPE_MSGBOX_WRN:				1
+TYPE_MSGBOX_INF:				2
+ICO_ERROR:						[ pen red fill-pen red circle 32x32 27 line-width 5 pen white line 16x48 48x16 line 16x16 48x48]
+ICO_WARNING:					[ line-width 5 pen yellow fill-pen yellow line-join round triangle 32x5 59x59 5x59 pen black line-cap round line 32x20 32x40 circle 32x50 2]
+ICO_INFORMATION:				[ pen blue fill-pen blue circle 32x32 27 line-width 5 pen white line 32x28 32x48 fill-pen white circle 32x18 1]
+
+MSGBOX_ERR:	reduce				[ TYPE_MSGBOX_ERR TITLE_ERROR		ICO_ERROR ] 
+MSGBOX_WRN:	reduce				[ TYPE_MSGBOX_WRN TITLE_WARNING		ICO_WARNING ]
+MSGBOX_INF:	reduce				[ TYPE_MSGBOX_INF TITLE_INFORMATION	ICO_INFORMATION ]
 
 
 ; Variables ---------------------------------------
@@ -86,6 +98,30 @@ model: object [
 
 
 ; Functions --------------------------------------
+
+; Improving the function of the same name 
+center-face: func [ "Center a face inside its parent"
+	face		[object!]	"Face to center" 
+	/with				{Provide a reference face for centering instead of parent face}
+		parent	[object!]	"Reference face"
+	/width					"To center in width"
+	/height					"To center in height"
+	return:
+			[object!]	"Returns the centered face"
+	][
+		unless parent [parent: either face/type = 'window	[system/view/screens/1]
+															[face/parent]
+		]
+		either parent [	
+			case [
+					width = height	[face/offset: parent/size - face/size / 2]
+					width			[face/offset/x: parent/size/x - face/size/x / 2]
+					height			[face/offset/y: parent/size/y - face/size/y / 2]
+			]
+		] [print "CENTER-FACE: face has no parent!"]
+	face
+]
+
 
 precalcul: function [
 	"Precalculate table of sin and cos"
@@ -409,32 +445,44 @@ rotationZ: function [
 	]
 ]
 
+; IHM -----------------------------------------------------
 
-popup_alert: function [
-	"Display a window with message's error"
-	msgerror	[string!]
+messagebox: function [
+	"Display a window with message"
+	msg			[string!]
+	typepop		[integer!]
+	/title
+		text	[string!]
 ][
-	pop: [
-		title TITLE_POPUP_ERROR size 200x100
-		below
-		text msgerror
-		button BTN_CLOSE [ unview ]
+	case [
+		typepop = MSGBOX_ERR/1 [dialog: MSGBOX_ERR]
+		typepop = MSGBOX_WRN/1 [dialog: MSGBOX_WRN]
+		typepop = MSGBOX_INF/1 [dialog: MSGBOX_INF]
 	]
+	if title = false [ text: dialog/2]
+	pop: layout [
+				title text size 320x128
+				icon: base 64x64 draw dialog/3
+				label: text msg return
+				bt_close: button "Ok" [ unview ]
+	]
+	center-face/width/with bt_close pop
+	label/offset/y: icon/offset/y + ((icon/size/y - label/size/y) / 2)
 	view pop
+
 ]
 
-
-; Main ---------------------------------------------
+; Main ----------------------------------------------------
 
 precalcul
 ;ret: loadASCfile %cube.asc
 ret: loadASCfile %duck.asc
 if (ret/1 = false) [
-	popup_alert ret/2
+	messagebox ret/2 TYPE_MSGBOX_ERR
 	quit
 ]
 if model/nb_elements = 0 [
-	popup_alert MSG_ERR_MODELNOTLOADED
+	messagebox MSG_ERR_MODELNOTLOADED TYPE_MSGBOX_WRN
 	quit
 ]
 
